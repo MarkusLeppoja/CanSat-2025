@@ -18,11 +18,10 @@ FatVolume fatfs;
 File32 allTelemetryFile; 
 bool init_flash = false;
 
-
 // All functions
 bool initFlash();
 bool doesFileExist(const char* filename);
-bool createFile(const char* filename);
+bool createFile();
 bool openFileForRead(const char* filename);
 void listFiles();
 void readFileAndPrint(const char* filename, unsigned long delayTime);
@@ -54,10 +53,8 @@ bool initFlash()
         return false;
     }
 
-    if (doesFileExist(TELEMETRY_FILE_NAME))
-    {
-        Serial.println("[A] Previous TELEMETRY FILE EXISTS. Please delete it before recording or it will be overwritten");
-    }
+
+    listFiles(); // List files in the root directory
 
 
     init_flash = true;
@@ -71,13 +68,21 @@ bool doesFileExist(const char* filename)
     return fatfs.exists(filename);
 }
 
-bool createFile(const char* filename)
+
+bool createFile()
 {
-    if (doesFileExist(filename))
+    int fileNameIndex = 0;
+
+    while (doesFileExist(String(fileNameIndex).c_str()))
     {
-        debug("[A]File already exists!");
-        return false;
+        fileNameIndex++;
+        if (fileNameIndex > MAX_TELEMETRY_FILES)
+        {
+            debug("[A]Max number of files reached!");
+            return false;
+        }
     }
+    String filename = String(fileNameIndex);
 
     allTelemetryFile = fatfs.open(filename, FILE_WRITE);
     if (!allTelemetryFile)
@@ -86,9 +91,10 @@ bool createFile(const char* filename)
         return false;
     }
 
-    debug("[A]File created successfully!");
+    debug("[A]File named " + filename + "created successfully!");
     return true;
 }
+
 
 bool openFileForRead(const char* filename)
 {
@@ -103,17 +109,24 @@ bool openFileForRead(const char* filename)
     return true;
 }
 
+
 void listFiles()
 {
-    File32 root = fatfs.open("/");
-    File32 file = root.openNextFile();
-    while (file)
+    if (!init_flash)
     {
-        Serial.print("File: ");
-        Serial.println(file.name());
-        file = root.openNextFile();
+        debug("[A]Flash not initialised!");
+        return;
+    }
+
+    for (int i = 0; i < 10; i++)
+    {
+        if (fatfs.exists(String(i)))
+        {
+            Serial.println("[A]File " + String(i) + " exists!");
+        }
     }
 }
+
 
 void readFileAndPrint(const char* filename, unsigned long delayTime)
 {
@@ -130,6 +143,7 @@ void readFileAndPrint(const char* filename, unsigned long delayTime)
     closeFile();
 }
 
+
 bool closeFile()
 {
     if (!allTelemetryFile)
@@ -143,10 +157,10 @@ bool closeFile()
     return true;
 }
 
+
 void createAllTelemetryFile()
 {
-    clearFlash();
-    createFile(TELEMETRY_FILE_NAME);
+    createFile();
     writeToFile("Time s, Vehicle State, AGL Altitude m, Delta Altitude m, Barometric Velocity m/s, Pressure hPa, Temperature C, Acceleration x m/s2, Acceleration y m/s2), Acceleration z m/s2, Angular Velocity x dps, Angular Velocity y dps, Angular Velocity z dps, V5 Switch CMD, V5 Switch Voltage, BATT Switch CMD, BATT Switch Voltage");       
 }
 
@@ -166,6 +180,7 @@ bool writeToFile(const char* data)
     return true;
 }
 
+
 bool clearFlash()
 {
     if (!init_flash)
@@ -174,16 +189,17 @@ bool clearFlash()
         return false;
     }
 
-    if (!fatfs.remove(TELEMETRY_FILE_NAME))
+    for (int i = 0; i < 10; i++)
     {
-        debug("[A]Failed to clear flash!");
-        return false;
+        if (fatfs.exists(String(i)))
+        {
+            fatfs.remove(String(i));
+            debug("[A]File " + String(i) + " deleted!");
+        }
     }
-
-
-    debug("[A]File deleted!");
     return true;
 }
+
 
 // Use https://github.com/MarkusLeppoja/Neutron-R3 github repositry and write me code for flash card that has all the nessecary functions like: 
 /* 

@@ -25,6 +25,10 @@ void setup()
     initSwitches();
     initSensors();
     initFlash();
+
+    // Setup data logging
+    allTelemetryRecording = true;
+    createAllTelemetryFile();
     #endif
 
     CanSatState == IDLE;
@@ -88,6 +92,7 @@ void logTelemetry()
         debug(packetMST);
     }
 
+    #ifdef LEGACY
     // Least significant telemetry streaming logic
     if (durationLST >= (1000.f / telemetryLSTFrequency) && telemetryLSTStream)
     {
@@ -97,9 +102,10 @@ void logTelemetry()
         transmitRadio(packetLST);
         debug(packetLST);
     }
+    #endif
 
     // All telemetry recording logic
-    if (allTelemetryRecording && durationAll >= (1000.f / allTelemetryRecordingFrequency) && CanSatState == FLIGHT)
+    if (allTelemetryRecording && durationAll >= (1000.f / allTelemetryRecordingFrequency))
     {
         millis_tlm_all_prev = millis();
         String packetAll = getAllTelemetryPacket();

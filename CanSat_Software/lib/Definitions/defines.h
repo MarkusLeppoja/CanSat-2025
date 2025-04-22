@@ -43,7 +43,7 @@ extern uint8_t allTelemetryRecordingFrequency;
 bool allTelemetryRecording = false;
 uint8_t allTelemetryRecordingFrequency = 10;
 
-#define TELEMETRY_FILE_NAME "CanSat_Telemetry"
+#define MAX_TELEMETRY_FILES 10
 /* FLASH & DATA RECORDING END */
 
 

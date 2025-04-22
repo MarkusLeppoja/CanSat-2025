@@ -171,10 +171,6 @@ void packetFiltering(String packet)
             CanSatState = FLIGHT;
             toggleBuzzer = true;
             toggleSwitch5V(true);
-            
-            // Setup data logging
-            allTelemetryRecording = true;
-            createAllTelemetryFile();
 
             telemetryMSTFrequency = 4;
             telemetryMSTStream = true;
@@ -237,15 +233,70 @@ void packetFiltering(String packet)
             break;
 
             case 'D':
-                readFileAndPrint(TELEMETRY_FILE_NAME, 5);
-                transmitRadio("[R,D]Printing all file data");
+                clearFlash();
+                transmitRadio("[R,D]Clearing flash");
             break;
 
             case 'E':
-                clearFlash();
-                transmitRadio("[R,E]Clearing flash");
+                listFiles();
+                transmitRadio("[R,D] Listing files");
+            break;
+        
+            case 'F':
+                closeFile();
+                transmitRadio("[R,F] Closing file");
             break;
 
+            // readalldata from files 0-10
+            case 'G':
+                transmitRadio("[R,G] Reading file 0");
+                readFileAndPrint("0", 5);
+            break;
+
+            case 'H':
+                transmitRadio("[R,H] Reading file 1");
+                readFileAndPrint("1", 5);
+            break;
+
+            case 'I':
+                transmitRadio("[R,I] Reading file 2");
+                readFileAndPrint("2", 5);
+            break;
+
+            case 'J':
+                transmitRadio("[R,J] Reading file 3");
+                readFileAndPrint("3", 5);
+            break;
+
+            case 'K':
+                transmitRadio("[R,K] Reading file 4");
+                readFileAndPrint("4", 5);
+            break;
+
+            case 'L':
+                transmitRadio("[R,L] Reading file 5");
+                readFileAndPrint("5", 5);
+            break;
+
+            case 'M':
+                transmitRadio("[R,M] Reading file 6");
+                readFileAndPrint("6", 5);
+            break;
+
+            case 'N':
+                transmitRadio("[R,N] Reading file 7");
+                readFileAndPrint("7", 5);
+            break;
+
+            case 'O':
+                transmitRadio("[R,O] Reading file 8");
+                readFileAndPrint("8", 5);
+            break;
+
+            case 'P':
+                transmitRadio("[R,P] Reading file 9");
+                readFileAndPrint("9", 5);
+            break;
         default:
             break;
         }
